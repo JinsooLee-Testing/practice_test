@@ -6,7 +6,6 @@ using GooglePlayGames.BasicApi;
 
 public class GoogleLoginManager : MonoBehaviour
 {
-    bool bWait = false;
 
     void Awake()
     {
@@ -15,23 +14,27 @@ public class GoogleLoginManager : MonoBehaviour
             .Build();
 
         PlayGamesPlatform.InitializeInstance(config);
-        // recommended for debugging:
-        PlayGamesPlatform.DebugLogEnabled = true;
-        // Activate the Google Play Games platform
+
         PlayGamesPlatform.Activate();
     }
 
 
     public void googleLogon()
     {
-        Social.localUser.Authenticate(success =>
-        {
+        Social.localUser.Authenticate(success => {
             if (success)
-            { Debug.Log("success"); }
+            {
+                Debug.Log("Authentication successful");
+                string userInfo = "Username: " + Social.localUser.userName +
+                    "\nUser ID: " + Social.localUser.id +
+                    "\nIsUnderage: " + Social.localUser.underage;
+                Debug.Log(userInfo);
+            }
             else
-            { Debug.Log("fail"); }
+                Debug.Log("Authentication failed");
         });
     }
+
 
     public void OnLogOut()
     {
@@ -39,3 +42,4 @@ public class GoogleLoginManager : MonoBehaviour
         Debug.Log("Logout");
     }
 }
+
