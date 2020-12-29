@@ -40,8 +40,9 @@ ExportedObj/
  
 *.booproj
  
- *apk
+*.apk
  
+*.keystore
 # ============ #
  
 # OS generated #
