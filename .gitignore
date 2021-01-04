@@ -71,5 +71,12 @@ ProjectSettings.asset
  
 ProjectVersion.txt
 
+# Firebase #
+# =============#
+Assets/StreamingAssets/google-services-desktop.json
+Assets/Plugin/Android/Firebase/
+Assets/Plugin/iOS/Firebase/
+# Assets/Plugin/Android/*.aar
+
 
 출처: https://minhyeokism.tistory.com/67 [programmer-dominic.kim]
