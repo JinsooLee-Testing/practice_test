@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using GooglePlayGames;
+using GooglePlayGames.BasicApi;
 using UnityEngine.UI;
 
 public class GoogleManager : MonoBehaviour
@@ -11,9 +12,9 @@ public class GoogleManager : MonoBehaviour
 
     void Start()
     {
-        PlayGamesPlatform.DebugLogEnabled = true;
+        PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder().RequestServerAuthCode(false).Build();
+        PlayGamesPlatform.InitializeInstance(config);
         PlayGamesPlatform.Activate();
-        LogIn();
     }
 
 
@@ -30,6 +31,8 @@ public class GoogleManager : MonoBehaviour
     public void LogOut()
     {
         ((PlayGamesPlatform)Social.Active).SignOut();
-        LogText.text = "구글 로그아웃";
+         LogText.text = "구글 로그아웃";
+            
+       
     }
 }
