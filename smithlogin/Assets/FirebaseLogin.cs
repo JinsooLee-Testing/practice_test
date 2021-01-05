@@ -3,39 +3,100 @@ using System.Collections.Generic;
 using UnityEngine;
 using Firebase;
 using Firebase.Auth;
+using GooglePlayGames;
+using GooglePlayGames.BasicApi;
+using UnityEngine.UI;
 public class FirebaseLogin : MonoBehaviour
 {
     Firebase.Auth.FirebaseAuth auth = null;
+    public Text Logtext;
     // Start is called before the first frame update
     void Start()
     {
         auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
     }
 
+    
 
-    public void GestLoginButton()
+    // Guest Login
+    public void GuestLoginButton()
     {
         auth.SignInAnonymouslyAsync().ContinueWith(task => {
             if (task.IsCanceled)
             {
-                Debug.LogError("SignInAnonymouslyAsync was canceled.");
-                return;
+                Logtext.text = "SignInAnonymouslyAsync was canceled.";
+                                return;
             }
             if (task.IsFaulted)
             {
-                Debug.LogError("SignInAnonymouslyAsync encountered an error: " + task.Exception);
+                Logtext.text = "SignInAnonymouslyAsync encountered an error: " + task.Exception;
+               
                 return;
             }
 
             Firebase.Auth.FirebaseUser newUser = task.Result;
-            Debug.LogFormat("User signed in successfully: {0} ({1})",
-                newUser.DisplayName, newUser.UserId);
+            Logtext.text = newUser.DisplayName + newUser.UserId;
+            
+        });
+    }
+
+    public void GoogleLoginBtnOnClick()
+    {
+        GooglePlayServiceInitialize();
+
+        Social.localUser.Authenticate(success =>
+        {
+            if (success == false) return;
+
+            StartCoroutine(coLogin());
+        });
+
+    }
+
+    void GooglePlayServiceInitialize()
+    {
+        PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder()
+            .RequestIdToken()
+            .Build();
+
+        PlayGamesPlatform.InitializeInstance(config);
+        PlayGamesPlatform.DebugLogEnabled = true;
+        PlayGamesPlatform.Activate();
+    }
+
+    IEnumerator coLogin()
+    {
+        while (System.String.IsNullOrEmpty(((PlayGamesLocalUser)Social.localUser).GetIdToken()))
+            yield return null;
+
+        string idToken = ((PlayGamesLocalUser)Social.localUser).GetIdToken();
+        string accessToken = null;
+
+
+
+        Credential credential = GoogleAuthProvider.GetCredential(idToken, accessToken);
+        auth.SignInWithCredentialAsync(credential).ContinueWith(task => {
+            if (task.IsCanceled)
+            {
+                Debug.LogError("SignInWithCredentialAsync was canceled.");
+                return;
+            }
+            if (task.IsFaulted)
+            {
+                Debug.LogError("SignInWithCredentialAsync encountered an error: " + task.Exception);
+                return;
+            }
+
+            FirebaseUser newUser = task.Result;
+            Logtext.text= newUser.DisplayName+ newUser.UserId;
+            
+
         });
     }
 
     public void LogOut()
     {
         auth.SignOut();
-        Debug.Log("logout");
+        Logtext.text = "logout";
     }
 }
