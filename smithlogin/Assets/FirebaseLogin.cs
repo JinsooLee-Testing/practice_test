@@ -8,6 +8,14 @@ using GooglePlayGames.BasicApi;
 using UnityEngine.UI;
 public class FirebaseLogin : MonoBehaviour
 {
+    // 이메일 InputField
+    [SerializeField]
+    InputField mEmailInputField;
+    // 비밀번호 InputField
+    [SerializeField]
+    InputField mPasswordInputField;
+    // 결과를 알려줄 텍스트
+
     Firebase.Auth.FirebaseAuth auth = null;
     public Text Logtext;
     // Start is called before the first frame update
@@ -16,10 +24,50 @@ public class FirebaseLogin : MonoBehaviour
         auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
     }
 
-    
+    // E-mail Signup    
+    public void SignUp()
+    {
+        // 회원가입 버튼은 인풋 필드가 비어있지 않을 때 작동한다.
+        if (mEmailInputField.text.Length != 0 && mPasswordInputField.text.Length != 0)
+        {
+            auth.CreateUserWithEmailAndPasswordAsync(mEmailInputField.text, mPasswordInputField.text).ContinueWith(
+                task =>
+                {
+                    if (!task.IsCanceled && !task.IsFaulted)
+                    {
+                        Logtext.text = "회원가입 성공";
+                    }
+                    else
+                    {
+                        Logtext.text = "회원가입 실패";
+                    }
+                });
+        }
+    }
 
-    // Guest Login
-    public void GuestLoginButton()
+    // E-mail Sign in
+    public void SignIn()
+    {
+        // 로그인 버튼은 인풋 필드가 비어있지 않을 때 작동한다.
+        if (mEmailInputField.text.Length != 0 && mPasswordInputField.text.Length != 0)
+        {
+            auth.SignInWithEmailAndPasswordAsync(mEmailInputField.text, mPasswordInputField.text).ContinueWith(
+                task =>
+                {
+                    if (task.IsCompleted && !task.IsCanceled && !task.IsFaulted)
+                    {
+                        Firebase.Auth.FirebaseUser newUser = task.Result;
+                        Logtext.text = "로그인 성공";
+                    }
+                    else
+                    {
+                        Logtext.text = "로그인 실패";
+                    }
+                });
+        }
+    }
+        // Guest Login
+        public void GuestLoginButton()
     {
         auth.SignInAnonymouslyAsync().ContinueWith(task => {
             if (task.IsCanceled)
