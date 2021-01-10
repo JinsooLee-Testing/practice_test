@@ -19,7 +19,7 @@ public class FirebaseLogin : MonoBehaviour
     Firebase.Auth.FirebaseAuth auth = null;
     public Text Logtext;
     // Start is called before the first frame update
-    void Start()
+    public void InittializeAccount()
     {
         auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
     }
