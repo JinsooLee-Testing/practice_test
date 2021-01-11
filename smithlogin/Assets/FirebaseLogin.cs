@@ -15,6 +15,7 @@ public class FirebaseLogin : MonoBehaviour
     [SerializeField]
     InputField mPasswordInputField;
     // 결과를 알려줄 텍스트
+    public GameObject mSignupPannel;
 
     Firebase.Auth.FirebaseAuth auth = null;
     public Text Logtext;
@@ -22,6 +23,22 @@ public class FirebaseLogin : MonoBehaviour
     public void InittializeAccount()
     {
         auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
+    }
+
+    public void LoginButton()
+    {
+        if (mSignupPannel != null)
+        {
+            mSignupPannel.SetActive(true);
+        }
+    }
+
+    public void LoginCloseButton()
+    {
+        if (mSignupPannel)
+        {
+            mSignupPannel.SetActive(false);
+        }
     }
 
     // E-mail Signup    
