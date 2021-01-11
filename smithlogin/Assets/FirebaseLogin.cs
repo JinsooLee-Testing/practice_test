@@ -99,10 +99,17 @@ public class FirebaseLogin : MonoBehaviour
                 return;
             }
 
-            Firebase.Auth.FirebaseUser newUser = task.Result;
-            Logtext.text = newUser.DisplayName + newUser.UserId;
-            
+            if (task.IsCompleted)
+            {
+                Firebase.Auth.FirebaseUser newUser = task.Result;
+                Logtext.text = newUser.DisplayName + newUser.UserId;
+               
+                LoginCloseButton();
+                Debug.Log(newUser.DisplayName + newUser.UserId);
+            }          
         });
+
+        
     }
 
     public void GoogleLoginBtnOnClick()
