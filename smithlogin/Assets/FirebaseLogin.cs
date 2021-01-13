@@ -16,18 +16,22 @@ public class FirebaseLogin : MonoBehaviour
     InputField mPasswordInputField;
     // 결과를 알려줄 텍스트
     public GameObject mSignupPannel;
+    bool LoginState = false;
 
     Firebase.Auth.FirebaseAuth auth = null;
     public Text Logtext;
     // Start is called before the first frame update
     public void InittializeAccount()
     {
+        //auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
+    }
+    void Start()
+    {
         auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
     }
-
     public void LoginButton()
     {
-        if (mSignupPannel != null)
+        if (mSignupPannel.activeSelf == false)
         {
             mSignupPannel.SetActive(true);
         }
@@ -35,56 +39,66 @@ public class FirebaseLogin : MonoBehaviour
 
     public void LoginCloseButton()
     {
-        if (mSignupPannel)
+        
+        if (mSignupPannel.activeSelf == true)
         {
+            
             mSignupPannel.SetActive(false);
         }
     }
 
-    // E-mail Signup    
-    public void SignUp()
+    public void EmailLogin()
     {
-        // 회원가입 버튼은 인풋 필드가 비어있지 않을 때 작동한다.
-        if (mEmailInputField.text.Length != 0 && mPasswordInputField.text.Length != 0)
+        auth.SignInWithEmailAndPasswordAsync(mEmailInputField.text, mPasswordInputField.text).ContinueWith(task => {
+            if (task.IsCanceled)
+            {
+                Debug.LogError("SignInWithEmailAndPasswordAsync was canceled.");
+                return;
+            }
+            if (task.IsFaulted)
+            {
+                Debug.LogError("SignInWithEmailAndPasswordAsync encountered an error: " + task.Exception);
+                return;
+            }
+
+            Firebase.Auth.FirebaseUser newUser = task.Result;
+            Debug.LogFormat("User signed in successfully: {0} ({1})",
+                newUser.DisplayName, newUser.UserId);
+            Logtext.text = ("Email Login");
+
+        });
+        if (auth != null)
         {
-            auth.CreateUserWithEmailAndPasswordAsync(mEmailInputField.text, mPasswordInputField.text).ContinueWith(
-                task =>
-                {
-                    if (!task.IsCanceled && !task.IsFaulted)
-                    {
-                        Logtext.text = "회원가입 성공";
-                    }
-                    else
-                    {
-                        Logtext.text = "회원가입 실패";
-                    }
-                });
-        }
+            LoginCloseButton();
+
+        } }
+
+        public void EmailSignUp()
+    {
+        
+        auth.CreateUserWithEmailAndPasswordAsync(mEmailInputField.text, mPasswordInputField.text).ContinueWith(task => {
+            if (task.IsCanceled)
+            {
+                Debug.LogError("CreateUserWithEmailAndPasswordAsync was canceled.");
+                return;
+            }
+            if (task.IsFaulted)
+            {
+                Debug.LogError("CreateUserWithEmailAndPasswordAsync encountered an error: " + task.Exception);
+                return;
+            }
+
+            // Firebase user has been created.
+            Firebase.Auth.FirebaseUser newUser = task.Result;
+            Debug.LogFormat("Firebase user created successfully: {0} ({1})",
+                newUser.DisplayName, newUser.UserId);
+            Logtext.text = ("회원가입 완료");
+            LoginCloseButton();
+        });
     }
 
-    // E-mail Sign in
-    public void SignIn()
-    {
-        // 로그인 버튼은 인풋 필드가 비어있지 않을 때 작동한다.
-        if (mEmailInputField.text.Length != 0 && mPasswordInputField.text.Length != 0)
-        {
-            auth.SignInWithEmailAndPasswordAsync(mEmailInputField.text, mPasswordInputField.text).ContinueWith(
-                task =>
-                {
-                    if (task.IsCompleted && !task.IsCanceled && !task.IsFaulted)
-                    {
-                        Firebase.Auth.FirebaseUser newUser = task.Result;
-                        Logtext.text = "로그인 성공";
-                    }
-                    else
-                    {
-                        Logtext.text = "로그인 실패";
-                    }
-                });
-        }
-    }
-        // Guest Login
-        public void GuestLoginButton()
+    // Guest Login
+    public void GuestLoginButton()
     {
         auth.SignInAnonymouslyAsync().ContinueWith(task => {
             if (task.IsCanceled)
@@ -99,17 +113,12 @@ public class FirebaseLogin : MonoBehaviour
                 return;
             }
 
-            if (task.IsCompleted)
-            {
-                Firebase.Auth.FirebaseUser newUser = task.Result;
-                Logtext.text = newUser.DisplayName + newUser.UserId;
-               
-                LoginCloseButton();
-                Debug.Log(newUser.DisplayName + newUser.UserId);
-            }          
         });
-
-        
+        if (auth != null)
+        {
+            LoginCloseButton();
+            
+        }
     }
 
     public void GoogleLoginBtnOnClick()
@@ -122,10 +131,14 @@ public class FirebaseLogin : MonoBehaviour
 
             StartCoroutine(coLogin());
         });
+        if (auth != null)
+        {
+            LoginCloseButton();
 
+
+        }
     }
-
-    void GooglePlayServiceInitialize()
+        void GooglePlayServiceInitialize()
     {
         PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder()
             .RequestIdToken()
@@ -170,5 +183,6 @@ public class FirebaseLogin : MonoBehaviour
     {
         auth.SignOut();
         Logtext.text = "logout";
+        LoginState = false;
     }
 }
