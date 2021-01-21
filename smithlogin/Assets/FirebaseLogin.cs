@@ -16,27 +16,68 @@ public class FirebaseLogin : MonoBehaviour
     InputField mPasswordInputField;
     // 결과를 알려줄 텍스트
     public GameObject mSignupPannel;
-    bool LoginState = false;
+    
+    private bool signedIn = false;
 
     Firebase.Auth.FirebaseAuth auth = null;
+    Firebase.Auth.FirebaseUser user = null;
     public Text Logtext;
     // Start is called before the first frame update
     public void InittializeAccount()
     {
         //auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
+        auth.StateChanged += AuthStateChanged;
+        Logtext.text = "Init";
     }
     void Start()
     {
         auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
+        
+       
+
     }
     public void LoginButton()
     {
-        if (mSignupPannel.activeSelf == false)
+        if (authSignIn() == true)
         {
-            mSignupPannel.SetActive(true);
+            if ((mSignupPannel.activeSelf == false))
+            {
+                mSignupPannel.SetActive(true);
+            }
+        }else
+        {
+            Logtext.text = "이미 로그인 되어 있습니다";
+        }
+    
+
+    }
+
+    void AuthStateChanged(object sender, System.EventArgs eventArgs)
+    {
+        if (auth.CurrentUser != user)
+        {
+            signedIn = user != auth.CurrentUser && auth.CurrentUser != null;
+
+            if (!signedIn && user != null) Logtext.text = user.UserId;
+
+            user = auth.CurrentUser;
+
+            if(signedIn) Logtext.text = user.UserId;
         }
     }
 
+
+
+    bool authSignIn()
+    {
+        if (auth.CurrentUser == null)
+        {
+            return true;
+        }
+        else return false;
+       
+        
+    }
     public void LoginCloseButton()
     {
         
@@ -173,16 +214,37 @@ public class FirebaseLogin : MonoBehaviour
             }
 
             FirebaseUser newUser = task.Result;
-            Logtext.text= newUser.DisplayName+ newUser.UserId;
+           
             
 
         });
+    }
+
+    public void SettingButon()
+    {
+        user = auth.CurrentUser;
+        if (user != null)
+        {
+            foreach (var profile in user.ProviderData)
+            {
+                // Id of the provider (ex: google.com)
+                string providerId = profile.ProviderId;
+
+                // UID specific to the provider
+                string uid = profile.UserId;
+
+                // Name, email address, and profile photo Url
+                string name = profile.DisplayName;
+                string email = profile.Email;
+                System.Uri photoUrl = profile.PhotoUrl;
+            }
+        }
     }
 
     public void LogOut()
     {
         auth.SignOut();
         Logtext.text = "logout";
-        LoginState = false;
+        
     }
 }
