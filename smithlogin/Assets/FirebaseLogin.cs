@@ -16,6 +16,13 @@ public class FirebaseLogin : MonoBehaviour
     InputField mPasswordInputField;
     // 결과를 알려줄 텍스트
     public GameObject mSignupPannel;
+    public GameObject mSettingPannel;
+    public Text mProvier;
+    public Text mUserID;
+    enum LoginState : int {NoLogin,Google, Guest, Email};
+    LoginState mLoginState = 0;
+
+
     
     private bool signedIn = false;
 
@@ -28,6 +35,7 @@ public class FirebaseLogin : MonoBehaviour
         //auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
         auth.StateChanged += AuthStateChanged;
         Logtext.text = "Init";
+        mLoginState = 0;
     }
     void Start()
     {
@@ -103,13 +111,12 @@ public class FirebaseLogin : MonoBehaviour
             }
 
             Firebase.Auth.FirebaseUser newUser = task.Result;
-            Debug.LogFormat("User signed in successfully: {0} ({1})",
-                newUser.DisplayName, newUser.UserId);
             Logtext.text = ("Email Login");
-
+            
         });
         if (auth != null)
         {
+            mLoginState = LoginState.Email;
             LoginCloseButton();
 
         } }
@@ -134,8 +141,15 @@ public class FirebaseLogin : MonoBehaviour
             Debug.LogFormat("Firebase user created successfully: {0} ({1})",
                 newUser.DisplayName, newUser.UserId);
             Logtext.text = ("회원가입 완료");
-            LoginCloseButton();
+            mLoginState = LoginState.Email;
+            
         });
+        if (auth != null)
+        {
+            mLoginState = LoginState.Email;
+            LoginCloseButton();
+
+        }
     }
 
     // Guest Login
@@ -153,7 +167,7 @@ public class FirebaseLogin : MonoBehaviour
                
                 return;
             }
-
+            mLoginState = LoginState.Guest;
         });
         if (auth != null)
         {
@@ -171,6 +185,7 @@ public class FirebaseLogin : MonoBehaviour
             if (success == false) return;
 
             StartCoroutine(coLogin());
+            mLoginState = LoginState.Google;
         });
         if (auth != null)
         {
@@ -220,31 +235,66 @@ public class FirebaseLogin : MonoBehaviour
         });
     }
 
+
     public void SettingButon()
     {
-        user = auth.CurrentUser;
-        if (user != null)
+
+       
+        switch(mLoginState)
         {
-            foreach (var profile in user.ProviderData)
-            {
-                // Id of the provider (ex: google.com)
-                string providerId = profile.ProviderId;
+            case LoginState.NoLogin :
 
-                // UID specific to the provider
-                string uid = profile.UserId;
+                break;
+            case LoginState.Guest:
+                 if (mSettingPannel.activeSelf == false)
+                {
+                    mSettingPannel.SetActive(true);
+                }
+                mProvier.text ="Guest";
+                mUserID.text = auth.CurrentUser.UserId;
+                break;
+            case LoginState.Google:
+                if (mSettingPannel.activeSelf == false)
+                {
+                    mSettingPannel.SetActive(true);
+                }
+                mProvier.text = "Google";
+                mUserID.text = auth.CurrentUser.UserId;
+                break;
+            case LoginState.Email:
+                if (mSettingPannel.activeSelf == false)
+                {
+                    mSettingPannel.SetActive(true);
+                }
+                mProvier.text = "E-mail";
+                mUserID.text = auth.CurrentUser.UserId;
+                break;
+            default:
+                Debug.Log("exceptional error");
+                break;
+        }         
 
-                // Name, email address, and profile photo Url
-                string name = profile.DisplayName;
-                string email = profile.Email;
-                System.Uri photoUrl = profile.PhotoUrl;
-            }
+
+    }
+
+    public void SettingCloseButton()
+    {
+        if (mSettingPannel.activeSelf == true)
+        {
+
+            mSettingPannel.SetActive(false);
         }
     }
 
     public void LogOut()
     {
+        if (mLoginState != LoginState.NoLogin)
+        {
+            mLoginState = LoginState.NoLogin;
+            
+            Logtext.text = "logout";
+        }
+        else Logtext.text = "Not Logout";
         auth.SignOut();
-        Logtext.text = "logout";
-        
     }
 }
