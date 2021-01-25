@@ -325,7 +325,7 @@ MonoBehaviour:
   mPasswordInputField: {fileID: 344521795}
   mSignupPannel: {fileID: 514305293}
   mSettingPannel: {fileID: 1059020048}
-  mProvier: {fileID: 1779740512}
+  mAccount: {fileID: 1779740512}
   mUserID: {fileID: 1924595151}
   Logtext: {fileID: 2094198776}
 --- !u!1 &293411401
@@ -610,7 +610,7 @@ GameObject:
   - component: {fileID: 355727976}
   - component: {fileID: 355727975}
   m_Layer: 5
-  m_Name: UserID
+  m_Name: UserIDNumber
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -667,7 +667,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\uC720\uC800ID"
+  m_Text: "\uD68C\uC6D0\uBC88\uD638\n"
 --- !u!222 &355727976
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2625,7 +2625,7 @@ GameObject:
   - component: {fileID: 1403878010}
   - component: {fileID: 1403878009}
   m_Layer: 5
-  m_Name: Provider
+  m_Name: Account
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2682,7 +2682,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\uC81C\uACF5\uD50C\uB7AB\uD3FC"
+  m_Text: "\uACC4\uC815"
 --- !u!222 &1403878010
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3119,7 +3119,7 @@ GameObject:
   - component: {fileID: 1779740513}
   - component: {fileID: 1779740512}
   m_Layer: 5
-  m_Name: ProviderText
+  m_Name: AccountText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3431,7 +3431,7 @@ GameObject:
   - component: {fileID: 1924595152}
   - component: {fileID: 1924595151}
   m_Layer: 5
-  m_Name: UserIDText
+  m_Name: IDNoText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

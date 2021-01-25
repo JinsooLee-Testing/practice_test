@@ -17,7 +17,7 @@ public class FirebaseLogin : MonoBehaviour
     // 결과를 알려줄 텍스트
     public GameObject mSignupPannel;
     public GameObject mSettingPannel;
-    public Text mProvier;
+    public Text mAccount;
     public Text mUserID;
     enum LoginState : int {NoLogin,Google, Guest, Email};
     LoginState mLoginState = 0;
@@ -110,7 +110,6 @@ public class FirebaseLogin : MonoBehaviour
                 return;
             }
 
-            Firebase.Auth.FirebaseUser newUser = task.Result;
             Logtext.text = ("Email Login");
             
         });
@@ -134,21 +133,13 @@ public class FirebaseLogin : MonoBehaviour
             {
                 Debug.LogError("CreateUserWithEmailAndPasswordAsync encountered an error: " + task.Exception);
                 return;
-            }
-
-            // Firebase user has been created.
-            Firebase.Auth.FirebaseUser newUser = task.Result;
-            Debug.LogFormat("Firebase user created successfully: {0} ({1})",
-                newUser.DisplayName, newUser.UserId);
-            Logtext.text = ("회원가입 완료");
-            mLoginState = LoginState.Email;
-            
+            }         
         });
         if (auth != null)
         {
             mLoginState = LoginState.Email;
             LoginCloseButton();
-
+            Logtext.text = "이메일 회원가입 완료";
         }
     }
 
@@ -227,11 +218,6 @@ public class FirebaseLogin : MonoBehaviour
                 Debug.LogError("SignInWithCredentialAsync encountered an error: " + task.Exception);
                 return;
             }
-
-            FirebaseUser newUser = task.Result;
-           
-            
-
         });
     }
 
@@ -250,7 +236,7 @@ public class FirebaseLogin : MonoBehaviour
                 {
                     mSettingPannel.SetActive(true);
                 }
-                mProvier.text ="Guest";
+                mAccount.text = auth.CurrentUser.Email;
                 mUserID.text = auth.CurrentUser.UserId;
                 break;
             case LoginState.Google:
@@ -258,7 +244,7 @@ public class FirebaseLogin : MonoBehaviour
                 {
                     mSettingPannel.SetActive(true);
                 }
-                mProvier.text = "Google";
+                mAccount.text = auth.CurrentUser.Email;
                 mUserID.text = auth.CurrentUser.UserId;
                 break;
             case LoginState.Email:
@@ -266,7 +252,7 @@ public class FirebaseLogin : MonoBehaviour
                 {
                     mSettingPannel.SetActive(true);
                 }
-                mProvier.text = "E-mail";
+                mAccount.text = auth.CurrentUser.Email;
                 mUserID.text = auth.CurrentUser.UserId;
                 break;
             default:
@@ -294,7 +280,6 @@ public class FirebaseLogin : MonoBehaviour
             
             Logtext.text = "logout";
         }
-        else Logtext.text = "Not Logout";
         auth.SignOut();
     }
 }
