@@ -17,32 +17,43 @@ public class FirebaseLogin : MonoBehaviour
     // 결과를 알려줄 텍스트
     public GameObject mSignupPannel;
     public GameObject mSettingPannel;
+
+
     public Text mAccount;
     public Text mUserID;
     enum LoginState : int {NoLogin,Google, Guest, Email};
-    LoginState mLoginState = 0;
 
-
+    LoginState mLoginState;
     
     private bool signedIn = false;
 
     Firebase.Auth.FirebaseAuth auth = null;
     Firebase.Auth.FirebaseUser user = null;
-    public Text Logtext;
+    public GameObject mInitTrue;
+    //public Image mInitFalse;
+
     // Start is called before the first frame update
     public void InittializeAccount()
     {
-        //auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
-        auth.StateChanged += AuthStateChanged;
-        Logtext.text = "Init";
-        mLoginState = 0;
+        if (auth.CurrentUser == null)
+        {
+            auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
+            auth.StateChanged += AuthStateChanged;
+            AuthStateChanged(this, null);
+            mLoginState = LoginState.NoLogin;
+
+        }
+        else
+        {
+            user = auth.CurrentUser;
+            Debug.Log("init_" + auth.CurrentUser.UserId);
+            Debug.Log("Provider :" + user.ProviderData);
+
+        }
     }
     void Start()
     {
-        auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
-        
-       
-
+        InittializeAccount();
     }
     public void LoginButton()
     {
@@ -51,13 +62,12 @@ public class FirebaseLogin : MonoBehaviour
             if ((mSignupPannel.activeSelf == false))
             {
                 mSignupPannel.SetActive(true);
-            }
-        }else
-        {
-            Logtext.text = "이미 로그인 되어 있습니다";
-        }
-    
 
+            }
+        }
+        else Debug.Log("Init을 안했거나 이미 로그인되어있습니다");
+    
+        
     }
 
     void AuthStateChanged(object sender, System.EventArgs eventArgs)
@@ -66,11 +76,11 @@ public class FirebaseLogin : MonoBehaviour
         {
             signedIn = user != auth.CurrentUser && auth.CurrentUser != null;
 
-            if (!signedIn && user != null) Logtext.text = user.UserId;
+            if (!signedIn && user != null) 
 
             user = auth.CurrentUser;
 
-            if(signedIn) Logtext.text = user.UserId;
+            
         }
     }
 
@@ -88,12 +98,9 @@ public class FirebaseLogin : MonoBehaviour
     }
     public void LoginCloseButton()
     {
-        
-        if (mSignupPannel.activeSelf == true)
-        {
-            
+    
             mSignupPannel.SetActive(false);
-        }
+        
     }
 
     public void EmailLogin()
@@ -110,15 +117,15 @@ public class FirebaseLogin : MonoBehaviour
                 return;
             }
 
-            Logtext.text = ("Email Login");
+            if(task.IsCompleted)
+            {
+                task.Wait();
+                mLoginState = LoginState.Email;
+                LoginCloseButton();
+            }
             
         });
-        if (auth != null)
-        {
-            mLoginState = LoginState.Email;
-            LoginCloseButton();
-
-        } }
+         }
 
         public void EmailSignUp()
     {
@@ -139,7 +146,7 @@ public class FirebaseLogin : MonoBehaviour
         {
             mLoginState = LoginState.Email;
             LoginCloseButton();
-            Logtext.text = "이메일 회원가입 완료";
+            
         }
     }
 
@@ -147,24 +154,32 @@ public class FirebaseLogin : MonoBehaviour
     public void GuestLoginButton()
     {
         auth.SignInAnonymouslyAsync().ContinueWith(task => {
-            if (task.IsCanceled)
+
+            if (task.IsCanceled || task.IsFaulted)
             {
-                Logtext.text = "SignInAnonymouslyAsync was canceled.";
+                Debug.Log("error");
+            }
+
+            Debug.Log("Login Ok" + auth.CurrentUser.UserId);
+            mLoginState = LoginState.Guest;
+            Debug.Log(mLoginState);
+            mSignupPannel.SetActive(false);
+            Debug.Log("1");
+            /*if (task.IsCanceled)
+            {
+                // "SignInAnonymouslyAsync was canceled.";
                                 return;
             }
             if (task.IsFaulted)
             {
-                Logtext.text = "SignInAnonymouslyAsync encountered an error: " + task.Exception;
+               // "SignInAnonymouslyAsync encountered an error: " 
                
                 return;
-            }
-            mLoginState = LoginState.Guest;
+            }*/
+
+
         });
-        if (auth != null)
-        {
-            LoginCloseButton();
-            
-        }
+
     }
 
     public void GoogleLoginBtnOnClick()
@@ -224,8 +239,11 @@ public class FirebaseLogin : MonoBehaviour
 
     public void SettingButon()
     {
-
-       
+        if (auth == null)
+        {
+            Debug.Log("Not Setting");
+        }
+        user = auth.CurrentUser;
         switch(mLoginState)
         {
             case LoginState.NoLogin :
@@ -236,24 +254,24 @@ public class FirebaseLogin : MonoBehaviour
                 {
                     mSettingPannel.SetActive(true);
                 }
-                mAccount.text = auth.CurrentUser.Email;
-                mUserID.text = auth.CurrentUser.UserId;
+                mAccount.text = user.Email;
+                mUserID.text = user.UserId;
                 break;
             case LoginState.Google:
                 if (mSettingPannel.activeSelf == false)
                 {
                     mSettingPannel.SetActive(true);
                 }
-                mAccount.text = auth.CurrentUser.Email;
-                mUserID.text = auth.CurrentUser.UserId;
+                mAccount.text = user.Email;
+                mUserID.text = user.UserId;
                 break;
             case LoginState.Email:
                 if (mSettingPannel.activeSelf == false)
                 {
                     mSettingPannel.SetActive(true);
                 }
-                mAccount.text = auth.CurrentUser.Email;
-                mUserID.text = auth.CurrentUser.UserId;
+                mAccount.text = user.Email;
+                mUserID.text = user.UserId;
                 break;
             default:
                 Debug.Log("exceptional error");
@@ -274,12 +292,14 @@ public class FirebaseLogin : MonoBehaviour
 
     public void LogOut()
     {
-        if (mLoginState != LoginState.NoLogin)
-        {
-            mLoginState = LoginState.NoLogin;
-            
-            Logtext.text = "logout";
-        }
+     
         auth.SignOut();
+        mLoginState = LoginState.NoLogin;
+        if (auth == null)
+        {
+            Debug.Log("auth == null");
+        }
+        else Debug.Log("Auth != null");
+        auth = null;
     }
 }
