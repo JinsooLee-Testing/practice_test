@@ -14,60 +14,66 @@ public class FirebaseLogin : MonoBehaviour
     // 비밀번호 InputField
     [SerializeField]
     InputField mPasswordInputField;
-    // 결과를 알려줄 텍스트
-    public GameObject mSignupPannel;
-    public GameObject mSettingPannel;
+    
 
-
+    // 각각 팝업창 및 내부 인자 관리 
+    public GameObject mSignupPanel;
+    public GameObject mSettingPanel;
+    public Image mLogPanel;
+    public Text mLogText;
     public Text mAccount;
     public Text mUserID;
-    enum LoginState : int {NoLogin,Google, Guest, Email};
 
+    // 각각 상태 제어 스테이트 
+    enum LoginState : int {NoLogin,Google, Guest, Email};
+    enum ButtonState : int { Initialize, Login, Logout }
     LoginState mLoginState;
-    
+    ButtonState mButtonState = ButtonState.Logout;    
     private bool signedIn = false;
 
-    Firebase.Auth.FirebaseAuth auth = null;
-    Firebase.Auth.FirebaseUser user = null;
-    public GameObject mInitTrue;
-    //public Image mInitFalse;
+    //파이어베이스 생성 
+    Firebase.Auth.FirebaseAuth auth;
+    Firebase.Auth.FirebaseUser user;
+
+    
 
     // Start is called before the first frame update
     public void InittializeAccount()
     {
-        if (auth.CurrentUser == null)
+        if (mButtonState == ButtonState.Logout)
         {
+            mButtonState = ButtonState.Initialize;
             auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
             auth.StateChanged += AuthStateChanged;
             AuthStateChanged(this, null);
-            mLoginState = LoginState.NoLogin;
-
+            mLogPanel.gameObject.SetActive(true);
+            mLogPanel.color = Color.blue;
+            mLogText.text = "Init";
         }
         else
         {
-            user = auth.CurrentUser;
-            Debug.Log("init_" + auth.CurrentUser.UserId);
-            Debug.Log("Provider :" + user.ProviderData);
-
+            mLogPanel.color = Color.red;
+            mLogText.text = "Init";
         }
+
     }
+
     void Start()
     {
-        InittializeAccount();
+        //InittializeAccount();
     }
     public void LoginButton()
     {
-        if (authSignIn() == true)
+        if ((mSignupPanel.activeSelf == false) && (mButtonState == ButtonState.Initialize))
         {
-            if ((mSignupPannel.activeSelf == false))
-            {
-                mSignupPannel.SetActive(true);
-
-            }
+            mLoginState = LoginState.NoLogin;
+            mSignupPanel.SetActive(true);
         }
-        else Debug.Log("Init을 안했거나 이미 로그인되어있습니다");
-    
-        
+        else
+        {
+            mLogPanel.color = Color.red;
+            mLogText.text = "Login";
+        }
     }
 
     void AuthStateChanged(object sender, System.EventArgs eventArgs)
@@ -76,7 +82,7 @@ public class FirebaseLogin : MonoBehaviour
         {
             signedIn = user != auth.CurrentUser && auth.CurrentUser != null;
 
-            if (!signedIn && user != null) 
+            if (!signedIn && user != null) { }
 
             user = auth.CurrentUser;
 
@@ -84,23 +90,14 @@ public class FirebaseLogin : MonoBehaviour
         }
     }
 
-
-
-    bool authSignIn()
-    {
-        if (auth.CurrentUser == null)
-        {
-            return true;
-        }
-        else return false;
-       
-        
-    }
     public void LoginCloseButton()
     {
-    
-            mSignupPannel.SetActive(false);
-        
+        mSignupPanel.SetActive(false);
+        if (mLoginState != LoginState.NoLogin)
+        {
+            mLogPanel.color = Color.blue;
+            mLogText.text = "Login";
+        }
     }
 
     public void EmailLogin()
@@ -115,17 +112,16 @@ public class FirebaseLogin : MonoBehaviour
             {
                 Debug.LogError("SignInWithEmailAndPasswordAsync encountered an error: " + task.Exception);
                 return;
-            }
-
-            if(task.IsCompleted)
-            {
-                task.Wait();
-                mLoginState = LoginState.Email;
-                LoginCloseButton();
-            }
-            
+            }            
         });
-         }
+        if (auth != null)
+        {
+            mLoginState = LoginState.Email;
+            mButtonState = ButtonState.Login;
+            LoginCloseButton();
+        }
+
+    }
 
         public void EmailSignUp()
     {
@@ -145,8 +141,8 @@ public class FirebaseLogin : MonoBehaviour
         if (auth != null)
         {
             mLoginState = LoginState.Email;
+            mButtonState = ButtonState.Login;
             LoginCloseButton();
-            
         }
     }
 
@@ -159,27 +155,13 @@ public class FirebaseLogin : MonoBehaviour
             {
                 Debug.Log("error");
             }
-
-            Debug.Log("Login Ok" + auth.CurrentUser.UserId);
-            mLoginState = LoginState.Guest;
-            Debug.Log(mLoginState);
-            mSignupPannel.SetActive(false);
-            Debug.Log("1");
-            /*if (task.IsCanceled)
-            {
-                // "SignInAnonymouslyAsync was canceled.";
-                                return;
-            }
-            if (task.IsFaulted)
-            {
-               // "SignInAnonymouslyAsync encountered an error: " 
-               
-                return;
-            }*/
-
-
         });
-
+        if (auth != null)
+        {
+            mLoginState = LoginState.Guest;
+            mButtonState = ButtonState.Login;
+            LoginCloseButton();
+        }
     }
 
     public void GoogleLoginBtnOnClick()
@@ -189,15 +171,13 @@ public class FirebaseLogin : MonoBehaviour
         Social.localUser.Authenticate(success =>
         {
             if (success == false) return;
-
             StartCoroutine(coLogin());
-            mLoginState = LoginState.Google;
         });
-        if (auth != null)
+        if(auth != null)
         {
+            mLoginState = LoginState.Google;
+            mButtonState = ButtonState.Login;
             LoginCloseButton();
-
-
         }
     }
         void GooglePlayServiceInitialize()
@@ -239,67 +219,81 @@ public class FirebaseLogin : MonoBehaviour
 
     public void SettingButon()
     {
-        if (auth == null)
+        if (mButtonState == ButtonState.Login)
         {
-            Debug.Log("Not Setting");
+            user = auth.CurrentUser;
+            mLogPanel.color = Color.blue;
+            mLogText.text = "Setting";
+            switch (mLoginState)
+            {
+                case LoginState.NoLogin:
+
+                    break;
+                case LoginState.Guest:
+                    if (mSettingPanel.activeSelf == false)
+                    {
+                        mSettingPanel.SetActive(true);
+                    }
+                    mAccount.text = user.Email;
+                    mUserID.text = user.UserId;
+                    break;
+                case LoginState.Google:
+                    if (mSettingPanel.activeSelf == false)
+                    {
+                        mSettingPanel.SetActive(true);
+                    }
+                    mAccount.text = user.Email;
+                    mUserID.text = user.UserId;
+                    break;
+                case LoginState.Email:
+                    if (mSettingPanel.activeSelf == false)
+                    {
+                        mSettingPanel.SetActive(true);
+                    }
+                    mAccount.text = user.Email;
+                    mUserID.text = user.UserId;
+                    break;
+                default:
+                    mLogText.text = "exceptional error";
+                    break;
+            }
         }
-        user = auth.CurrentUser;
-        switch(mLoginState)
+        else
         {
-            case LoginState.NoLogin :
-
-                break;
-            case LoginState.Guest:
-                 if (mSettingPannel.activeSelf == false)
-                {
-                    mSettingPannel.SetActive(true);
-                }
-                mAccount.text = user.Email;
-                mUserID.text = user.UserId;
-                break;
-            case LoginState.Google:
-                if (mSettingPannel.activeSelf == false)
-                {
-                    mSettingPannel.SetActive(true);
-                }
-                mAccount.text = user.Email;
-                mUserID.text = user.UserId;
-                break;
-            case LoginState.Email:
-                if (mSettingPannel.activeSelf == false)
-                {
-                    mSettingPannel.SetActive(true);
-                }
-                mAccount.text = user.Email;
-                mUserID.text = user.UserId;
-                break;
-            default:
-                Debug.Log("exceptional error");
-                break;
-        }         
-
-
+            mLogPanel.color = Color.red;
+            mLogText.text = "Setting";
+        }
     }
 
     public void SettingCloseButton()
     {
-        if (mSettingPannel.activeSelf == true)
+        if (mSettingPanel.activeSelf == true)
         {
-
-            mSettingPannel.SetActive(false);
+            mSettingPanel.SetActive(false);
         }
     }
 
     public void LogOut()
-    {
-     
+    {     
         auth.SignOut();
-        mLoginState = LoginState.NoLogin;
-        if (auth == null)
+        if (mButtonState == ButtonState.Login)
         {
-            Debug.Log("auth == null");
+            mLogPanel.color = Color.blue;
+            mLogText.text = "Logout";
         }
-        else Debug.Log("Auth != null");
+        else
+        {
+            mLogPanel.color = Color.red;
+            mLogText.text = "Logout";
+        }
+        mLoginState = LoginState.NoLogin;
+        mButtonState = ButtonState.Logout;
+
+    }
+
+    void OnDestroy()
+    {
+        auth.StateChanged -= AuthStateChanged;
         auth = null;
     }
 }
