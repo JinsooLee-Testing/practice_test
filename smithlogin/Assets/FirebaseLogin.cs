@@ -46,12 +46,13 @@ public class FirebaseLogin : MonoBehaviour
             auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
             auth.StateChanged += AuthStateChanged;
             AuthStateChanged(this, null);
-            mLogPanel.gameObject.SetActive(true);
+            if(mLogPanel.gameObject.activeSelf == false)  mLogPanel.gameObject.SetActive(true);
             mLogPanel.color = Color.blue;
             mLogText.text = "Init";
         }
         else
         {
+            if (mLogPanel.gameObject.activeSelf == false) mLogPanel.gameObject.SetActive(true);
             mLogPanel.color = Color.red;
             mLogText.text = "Init";
         }
@@ -71,6 +72,7 @@ public class FirebaseLogin : MonoBehaviour
         }
         else
         {
+            if (mLogPanel.gameObject.activeSelf == false) mLogPanel.gameObject.SetActive(true);
             mLogPanel.color = Color.red;
             mLogText.text = "Login";
         }
@@ -81,12 +83,8 @@ public class FirebaseLogin : MonoBehaviour
         if (auth.CurrentUser != user)
         {
             signedIn = user != auth.CurrentUser && auth.CurrentUser != null;
-
             if (!signedIn && user != null) { }
-
             user = auth.CurrentUser;
-
-            
         }
     }
 
@@ -95,6 +93,7 @@ public class FirebaseLogin : MonoBehaviour
         mSignupPanel.SetActive(false);
         if (mLoginState != LoginState.NoLogin)
         {
+            if (mLogPanel.gameObject.activeSelf == false) mLogPanel.gameObject.SetActive(true);
             mLogPanel.color = Color.blue;
             mLogText.text = "Login";
         }
@@ -222,6 +221,7 @@ public class FirebaseLogin : MonoBehaviour
         if (mButtonState == ButtonState.Login)
         {
             user = auth.CurrentUser;
+            if (mLogPanel.gameObject.activeSelf == false) mLogPanel.gameObject.SetActive(true);
             mLogPanel.color = Color.blue;
             mLogText.text = "Setting";
             switch (mLoginState)
@@ -234,7 +234,7 @@ public class FirebaseLogin : MonoBehaviour
                     {
                         mSettingPanel.SetActive(true);
                     }
-                    mAccount.text = user.Email;
+                    mAccount.text = " -(Guest) ";
                     mUserID.text = user.UserId;
                     break;
                 case LoginState.Google:
@@ -242,7 +242,7 @@ public class FirebaseLogin : MonoBehaviour
                     {
                         mSettingPanel.SetActive(true);
                     }
-                    mAccount.text = user.Email;
+                    mAccount.text = " -(Google) ";
                     mUserID.text = user.UserId;
                     break;
                 case LoginState.Email:
@@ -274,20 +274,24 @@ public class FirebaseLogin : MonoBehaviour
     }
 
     public void LogOut()
-    {     
-        auth.SignOut();
+    {   
+        if(auth != null)  auth.SignOut();
+
         if (mButtonState == ButtonState.Login)
         {
+            if (mLogPanel.gameObject.activeSelf == false) mLogPanel.gameObject.SetActive(true);
             mLogPanel.color = Color.blue;
             mLogText.text = "Logout";
+            mLoginState = LoginState.NoLogin;
+            mButtonState = ButtonState.Logout;
         }
         else
         {
+            if (mLogPanel.gameObject.activeSelf == false) mLogPanel.gameObject.SetActive(true);
             mLogPanel.color = Color.red;
             mLogText.text = "Logout";
         }
-        mLoginState = LoginState.NoLogin;
-        mButtonState = ButtonState.Logout;
+        
 
     }
 
