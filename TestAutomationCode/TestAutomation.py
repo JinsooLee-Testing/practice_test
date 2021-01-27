@@ -80,15 +80,39 @@ class SmithLoginTest(unittest.TestCase):
         driver = self.driver
         wait = WebDriverWait(driver, 20)
 
-        sleep(50)
+        sleep(20)
 
-        # 'Init' 이미지 찾아z tap 한다.
-        screenshotPath = test_Directory + '%s-screenshot.png' % self.makeTS()
-        detectImagePath = currentPath + 'searchimages/InitButton.png'
-        driver.save_screenshot(screenshotPath)
+        # Case 1 'Init' 이미지 찾아 tap 한다.
+        Case1_screenshotPath = test_Directory + '%s-screenshot.png' % self.makeTS()
+        Case1_detectImagePath = currentPath + 'searchimages/InitButton.png'
+        driver.save_screenshot(Case1_screenshotPath)
 
-        InitButtonTouch = matching.detectimage(screenshotPath, detectImagePath)
-        driver.tap([InitButtonTouch])
+        Case1_InitButtonTouch = matching.detectimage(Case1_screenshotPath, Case1_detectImagePath)
+        driver.tap([Case1_InitButtonTouch])
+        sleep(5)
+
+        # Case 2 'Init' 터치 시 로그이미지가 Blue 색상으로 노출되는지 확인한다.
+        Case2_screenshotPath = test_Directory + '%s-screenshot.png' % self.makeTS()
+        Case2_detectImagePath = currentPath + 'searchimages/InitSuccess.png'
+        driver.save_screenshot(Case2_screenshotPath)
+        matching.detectimage(Case2_screenshotPath,Case2_detectImagePath)
+        sleep(5)
+
+        # Case 3 Login 이미지 찾아 tap 한다.
+        Case3_screenshotPath = test_Directory + '%s-screenshot.png' % self.makeTS()
+        Case3_detectImagePath = currentPath + 'searchimages/LoginButton.png'
+        driver.save_screenshot(Case3_screenshotPath)
+
+        Case3_InitButtonTouch = matching.detectimage(Case3_screenshotPath, Case3_detectImagePath)
+        driver.tap([Case3_InitButtonTouch])
+        sleep(5)
+
+        # Case 4 Login 버튼 터치 시 로그인 화면이 나오는지 확인한다.
+        Case4_screenshotPath = test_Directory + '%s-screenshot.png' % self.makeTS()
+        Case4_detectImagePath = currentPath + 'searchimages/LoginScreen.png'
+        driver.save_screenshot(Case4_screenshotPath)
+        matching.detectimage(Case4_screenshotPath, Case4_detectImagePath)
+        sleep(5)
 
         # 30초 동안 기다립니다.
         sleep(30)
