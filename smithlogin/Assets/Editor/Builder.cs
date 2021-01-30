@@ -11,7 +11,7 @@ namespace PnBuilder
     {
         static string[] SCENES = FindEnabledEditorScenes();
 
-        static string APP_NAME = "smithlogin";
+        static string APP_NAME = "smith";
         static string TARGET_DIR = "Build";
 
         static void Build()
@@ -48,11 +48,11 @@ namespace PnBuilder
         static void GenericBuild( string [] scenes, string target_dir, BuildTargetGroup build_group, BuildTarget build_target, BuildOptions build_options )
         {
             EditorUserBuildSettings.SwitchActiveBuildTarget( build_group, build_target );
-            string res = BuildPipeline.BuildPlayer( scenes, target_dir, build_target, build_options );
+            /*8string res = BuildPipeline.BuildPlayer( scenes, target_dir, build_target, build_options );
             if ( res.Length > 0 )
             {
                 throw new Exception( "BuildPlayer failure: " + res );
-            }
+            }*/
         }
 
         private static string GetArg( string name)
