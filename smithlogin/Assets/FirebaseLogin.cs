@@ -102,30 +102,46 @@ public class FirebaseLogin : MonoBehaviour
         }
     }
 
+    private bool CheckEmail(string idInputText, string PassInputText)
+    {
+        if (idInputText.Length == 0 || PassInputText.Length == 0)
+        {
+            Debug.Log("아이디를 입력하시지 않았어요");
+            return false;
+        }
+        else return true;
+    }
     public void EmailLogin()
     {
-        auth.SignInWithEmailAndPasswordAsync(mEmailInputField.text, mPasswordInputField.text).ContinueWith(task => {
-            if (task.IsCanceled)
+        if (CheckEmail(mEmailInputField.text, mPasswordInputField.text))
             {
-                Debug.LogError("SignInWithEmailAndPasswordAsync was canceled.");
-                return;
-            }
-            if (task.IsFaulted)
+            auth.SignInWithEmailAndPasswordAsync(mEmailInputField.text, mPasswordInputField.text).ContinueWith(task =>
             {
-                Debug.LogError("SignInWithEmailAndPasswordAsync encountered an error: " + task.Exception);
-                return;
-            }            
-        });
-        if (auth != null)
+                if (task.IsCanceled)
+                {
+                    Debug.LogError("SignInWithEmailAndPasswordAsync was canceled.");
+                    return;
+                }
+                if (task.IsFaulted)
+                {
+                    Debug.LogError("SignInWithEmailAndPasswordAsync encountered an error: " + task.Exception);
+                    return;
+                }
+
+                mLoginState = LoginState.Email;
+                mButtonState = ButtonState.Login;
+                
+            });
+        }
+        if (mButtonState == ButtonState.Login)
         {
-            mLoginState = LoginState.Email;
-            mButtonState = ButtonState.Login;
+
             LoginCloseButton();
         }
 
     }
 
-        public void EmailSignUp()
+    public void EmailSignUp()
     {
         
         auth.CreateUserWithEmailAndPasswordAsync(mEmailInputField.text, mPasswordInputField.text).ContinueWith(task => {
@@ -157,11 +173,16 @@ public class FirebaseLogin : MonoBehaviour
             {
                 Debug.Log("error");
             }
+            else
+            {
+                mLoginState = LoginState.Guest;
+                mButtonState = ButtonState.Login;
+                
+            }
         });
-        if (auth != null)
+        if (mButtonState == ButtonState.Login)
         {
-            mLoginState = LoginState.Guest;
-            mButtonState = ButtonState.Login;
+            
             LoginCloseButton();
         }
     }
