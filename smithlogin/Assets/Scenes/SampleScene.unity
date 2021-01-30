@@ -826,7 +826,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: LogText
+  m_Text: 
 --- !u!222 &434521276
 CanvasRenderer:
   m_ObjectHideFlags: 0
