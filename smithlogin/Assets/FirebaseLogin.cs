@@ -19,6 +19,8 @@ public class FirebaseLogin : MonoBehaviour
     // 각각 팝업창 및 내부 인자 관리 
     public GameObject mSignupPanel;
     public GameObject mSettingPanel;
+    public GameObject mProvider;
+
     public Image mLogPanel;
     public Text mLogText;
     public Text mAccount;
@@ -61,7 +63,8 @@ public class FirebaseLogin : MonoBehaviour
 
     void Start()
     {
-        //InittializeAccount();
+       
+
     }
     public void LoginButton()
     {
@@ -235,6 +238,7 @@ public class FirebaseLogin : MonoBehaviour
                         mSettingPanel.SetActive(true);
                     }
                     mAccount.text = " -(Guest) ";
+                    mProvider.GetComponent<Image>().sprite = Resources.Load("GuestIcon", typeof(Sprite)) as Sprite;
                     mUserID.text = user.UserId;
                     break;
                 case LoginState.Google:
@@ -243,6 +247,7 @@ public class FirebaseLogin : MonoBehaviour
                         mSettingPanel.SetActive(true);
                     }
                     mAccount.text = " -(Google) ";
+                    mProvider.GetComponent<Image>().sprite = Resources.Load("g-logo", typeof(Sprite)) as Sprite;
                     mUserID.text = user.UserId;
                     break;
                 case LoginState.Email:
@@ -251,6 +256,7 @@ public class FirebaseLogin : MonoBehaviour
                         mSettingPanel.SetActive(true);
                     }
                     mAccount.text = user.Email;
+                    mProvider.GetComponent<Image>().sprite = Resources.Load("EmailProviderIcon", typeof(Sprite)) as Sprite;
                     mUserID.text = user.UserId;
                     break;
                 default:
