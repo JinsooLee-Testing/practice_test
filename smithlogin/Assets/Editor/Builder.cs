@@ -1,49 +1,54 @@
 using UnityEngine;
-using System.Collections;
-using UnityEditor;
-using System.Collections.Generic;
 using System;
+using System.IO;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEditor.Build.Reporting;
 
-namespace PnBuilder
+
+
+public class Builder
 {
-    class Builder
+  
+    [MenuItem("Build/Build AOS(Release)")]
+    public static void BuildAOS()
     {
-        static string[] SCENES = FindEnabledEditorScenes();
-        static string APP_NAME = "smithlogin";
-        static string TARGET_DIR = @"C:";
+        PlayerSettings.keyaliasPass = "1q2w3e4r!";
+        PlayerSettings.keystorePass = "1q2w3e4r!";
 
-        [MenuItem("Build/Android")]
-        public static void Build()
+
+        BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
+        buildPlayerOptions.scenes = FindEnabledEditorScenes();
+        buildPlayerOptions.locationPathName = string.Format(@"C:\Users\iris2\Desktop\smithlogin.apk"
+            , PlayerSettings.bundleVersion);
+        buildPlayerOptions.target = BuildTarget.Android;
+        buildPlayerOptions.options = BuildOptions.None;
+        BuildReport report = BuildPipeline.BuildPlayer(buildPlayerOptions);
+        BuildSummary summary = report.summary;
+
+        if (summary.result == BuildResult.Succeeded)
         {
-            //AndroidSDKFolder.Path = @"C:\Android-sdk";
-
-            string target_dir = APP_NAME + ".apk";
-            GenericBuild(SCENES, TARGET_DIR + "/" + target_dir, BuildTarget.Android, BuildOptions.None);
+            Debug.Log("Build Succeeded : " + summary.totalSize + " bytes");
         }
-
-        private static string[] FindEnabledEditorScenes()
+        if (summary.result == BuildResult.Failed)
         {
-            List<string> EditorScenes = new List<string>();
-            foreach (EditorBuildSettingsScene scene in EditorBuildSettings.scenes)
-            {
-                if (!scene.enabled)
-                    continue;
-                EditorScenes.Add(scene.path);
-            }
-            return EditorScenes.ToArray();
-        }
-
-        static void GenericBuild(string[] scenes, string target_dir, BuildTarget build_target, BuildOptions build_options)
-        {
-            EditorUserBuildSettings.SwitchActiveBuildTarget(build_target);
-           /* string res = BuildPipeline.BuildPlayer(scenes, target_dir, build_target, build_options);
-            if (res.Length > 0)
-            {
-                throw new Exception("BuildPlayer failure: " + res);
-            }*/
+            Debug.Log("Failed Build");
         }
     }
 
-        
+    private static string[] FindEnabledEditorScenes()
+    {
+        List<string> EditorScenes = new List<string>();
+
+        foreach (EditorBuildSettingsScene scene in EditorBuildSettings.scenes)
+        {
+            if (!scene.enabled) continue;
+            EditorScenes.Add(scene.path);
+        }
+        return EditorScenes.ToArray();
+    }
 
 }
+
+
